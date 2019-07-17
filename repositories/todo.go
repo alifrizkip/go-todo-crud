@@ -65,15 +65,33 @@ func (r *TodoRepo) FindByID(todoID string) (*models.Todo, error) {
 
 // Save ...
 func (r *TodoRepo) Save(todo *models.Todo) error {
+	_, err := r.db.Exec("insert into todos values (?, ?, ?, ?)", todo.TodoID, todo.Title, todo.Detail, todo.IsDone)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Update ...
 func (r *TodoRepo) Update(todoID string, todo *models.Todo) error {
+	_, err := r.db.Exec(`update todos
+		set title = ?, detail = ?, is_done = ?
+		where todo_id = ?`,
+		todo.Title, todo.Detail, todo.IsDone, todoID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Delete ...
 func (r *TodoRepo) Delete(todoID string) error {
+	_, err := r.db.Exec("delete from todos where todo_id = ?", todoID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -3,9 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
-
-	repo "go-crud/repositories"
+	"go-crud/repositories"
+	"go-crud/routers"
+	"go-crud/services"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
@@ -21,26 +21,17 @@ func main() {
 	}
 	defer db.Close()
 
-	r := echo.New()
+	server := echo.New()
 
-	r.GET("/todos", func(ctx echo.Context) error {
-		todoRepo := new(repo.TodoRepo).New(db)
-		data, _ := todoRepo.FindAll()
+	todoRepo := new(repositories.TodoRepo).New(db)
+	todoService := new(services.TodoService).New(todoRepo)
 
-		return ctx.JSON(http.StatusOK, data)
-	})
+	router := new(routers.TodoRouter)
+	router.Services.TodoService = todoService
 
-	r.GET("/todos/:id", func(ctx echo.Context) error {
-		todoRepo := new(repo.TodoRepo).New(db)
-		data, _ := todoRepo.FindByID(ctx.Param("id"))
+	server = router.New(server)
 
-		return ctx.JSON(http.StatusOK, data)
-	})
-	// r.POST("/todos", createTodoHandler)
-	// r.PUT("/todos/:id", updateTodoHandler)
-	// r.DELETE("/todos/:id", deleteTodoHandler)
-
-	r.Start(":9000")
+	server.Start(":9000")
 }
 
 func connect() (*sql.DB, error) {
