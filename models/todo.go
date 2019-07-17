@@ -1,8 +1,9 @@
 package models
 
+// Todo model
 type Todo struct {
-	TodoID string
-	Title  string
-	Detail string
-	IsDone bool
+	TodoID string `json:"todo_id"`
+	Title  string `json:"title"`
+	Detail string `json:"detail"`
+	IsDone bool   `json:"is_done"`
 }

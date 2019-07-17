@@ -1,12 +1,14 @@
 package requests
 
+// NewTodo ...
 type NewTodo struct {
-	Title  string
-	Detail string
+	Title  string `json:"title"`
+	Detail string `json:"detail"`
 }
 
+// UpdateTodo ...
 type UpdateTodo struct {
-	Title  string
-	Detail string
-	IsDone bool
+	Title  string `json:"title"`
+	Detail string `json:"detail"`
+	IsDone bool   `json:"is_done"`
 }
