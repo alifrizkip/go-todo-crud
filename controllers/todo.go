@@ -82,6 +82,23 @@ func (t *TodoController) UpdateTodo(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, resp)
 }
 
+// DeleteTodo ...
+func (t *TodoController) DeleteTodo(ctx echo.Context) error {
+	todoID := ctx.Param("id")
+	err := t.TodoService.DeleteTodo(todoID)
+	if err != nil {
+		return err
+	}
+
+	resp := struct {
+		Message string `json:"message"`
+	}{
+		Message: "Todo deleted successfully",
+	}
+
+	return ctx.JSON(http.StatusOK, resp)
+}
+
 // TestHandler ...
 func (t *TodoController) TestHandler(ctx echo.Context) error {
 	resp := struct {
