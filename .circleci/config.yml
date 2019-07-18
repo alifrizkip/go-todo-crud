@@ -21,8 +21,8 @@ jobs:
     ####   /go/src/bitbucket.org/circleci/go-tool
     # working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
-      codecov/upload:
-        file: {{ coverage_report_filepath }}
+      - codecov/upload:
+          file: {{ coverage_report_filepath }}
       - checkout
 
       # specify any bash command here prefixed with `run: `
