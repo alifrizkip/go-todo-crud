@@ -31,7 +31,7 @@ func (r *TodoRepoMock) Save(todo *models.Todo) error {
 
 // Update ...
 func (r *TodoRepoMock) Update(todoID string, todo *models.Todo) error {
-	args := r.Called(todoID)
+	args := r.Called(todoID, todo)
 	return args.Error(0)
 }
 

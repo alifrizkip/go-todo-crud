@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"go-crud/models"
 	"go-crud/repositories"
 	"go-crud/requests"
@@ -38,7 +39,19 @@ func TestTodoService_GetAllTodos(t *testing.T) {
 	assert.True(t, isInstanceOfModelsTodo(data[0]), "Todos datas item must instance of models.Todo")
 }
 
-func TestTodoService_GetATodos(t *testing.T) {
+func TestTodoService_GetAllTodos_Error(t *testing.T) {
+	todoRepo := &repositories.TodoRepoMock{}
+	service := new(TodoService).New(todoRepo)
+
+	todos := []*models.Todo{}
+	todoRepo.On("FindAll").Return(todos, errors.New("Return error"))
+
+	data, err := service.GetAllTodos()
+	assert.Error(t, err)
+	assert.Nil(t, data)
+}
+
+func TestTodoService_GetATodo(t *testing.T) {
 	todoRepo := &repositories.TodoRepoMock{}
 	service := new(TodoService).New(todoRepo)
 
@@ -60,6 +73,17 @@ func TestTodoService_GetATodos(t *testing.T) {
 	assert.False(t, data.IsDone)
 }
 
+func TestTodoService_GetATodo_Error(t *testing.T) {
+	todoRepo := &repositories.TodoRepoMock{}
+	service := new(TodoService).New(todoRepo)
+
+	todoRepo.On("FindByID", "aaa").Return(&models.Todo{}, errors.New("Return error"))
+
+	data, err := service.GetATodo("aaa")
+	assert.Error(t, err)
+	assert.Nil(t, data)
+}
+
 func TestTodoService_CreateTodo(t *testing.T) {
 	todoRepo := &repositories.TodoRepoMock{}
 	service := new(TodoService).New(todoRepo)
@@ -74,21 +98,58 @@ func TestTodoService_CreateTodo(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestTodoService_CreateTodo_Error(t *testing.T) {
+	todoRepo := &repositories.TodoRepoMock{}
+	service := new(TodoService).New(todoRepo)
+
+	newTodo := &requests.NewTodo{
+		Title: "Wake up", Detail: "Bangun tidur",
+	}
+
+	todoRepo.On("Save", mock.Anything).Return(errors.New("Return error"))
+
+	err := service.CreateTodo(newTodo)
+	assert.Error(t, err)
+}
+
 func TestTodoService_UpdateTodo(t *testing.T) {
 	todoRepo := &repositories.TodoRepoMock{}
 	service := new(TodoService).New(todoRepo)
 
-	updateTodo := &requests.UpdateTodo{
+	updateTodoReq := &requests.UpdateTodo{
 		Title: "Sleep", Detail: "Tidur malam", IsDone: true,
 	}
 	updateTodoID := "aaa"
 
-	todoRepo.On("Update", mock.MatchedBy(func(todoID string) bool {
-		assert.Equal(t, updateTodoID, todoID)
-		return true
-	})).Return(nil)
-	err := service.UpdateTodo(updateTodoID, updateTodo)
+	updateTodo := &models.Todo{
+		Title:  updateTodoReq.Title,
+		Detail: updateTodoReq.Detail,
+		IsDone: updateTodoReq.IsDone,
+	}
+
+	todoRepo.On("Update", updateTodoID, updateTodo).Return(nil)
+	err := service.UpdateTodo(updateTodoID, updateTodoReq)
 	assert.NoError(t, err)
+}
+
+func TestTodoService_UpdateTodo_Error(t *testing.T) {
+	todoRepo := &repositories.TodoRepoMock{}
+	service := new(TodoService).New(todoRepo)
+
+	updateTodoReq := &requests.UpdateTodo{
+		Title: "Sleep", Detail: "Tidur malam", IsDone: true,
+	}
+	updateTodoID := "aaa"
+
+	updateTodo := &models.Todo{
+		Title:  updateTodoReq.Title,
+		Detail: updateTodoReq.Detail,
+		IsDone: updateTodoReq.IsDone,
+	}
+
+	todoRepo.On("Update", updateTodoID, updateTodo).Return(errors.New("Return error"))
+	err := service.UpdateTodo(updateTodoID, updateTodoReq)
+	assert.Error(t, err)
 }
 
 func TestTodoService_DeleteTodo(t *testing.T) {
@@ -103,4 +164,13 @@ func TestTodoService_DeleteTodo(t *testing.T) {
 	})).Return(nil)
 	err := service.DeleteTodo(deleteTodoID)
 	assert.NoError(t, err)
+}
+
+func TestTodoService_DeleteTodo_Error(t *testing.T) {
+	todoRepo := &repositories.TodoRepoMock{}
+	service := new(TodoService).New(todoRepo)
+
+	todoRepo.On("Delete", "aaa").Return(errors.New("Return error"))
+	err := service.DeleteTodo("aaa")
+	assert.Error(t, err)
 }
