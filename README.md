@@ -1,4 +1,5 @@
 # CRUD TodoApp
+[![CircleCI](https://circleci.com/gh/alfrizp/go-todo-crud.svg?style=svg)](https://circleci.com/gh/alfrizp/go-todo-crud)
 
 ### Problem Statement
 
