@@ -3,9 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"go-crud/repositories"
-	"go-crud/routers"
-	"go-crud/services"
+
+	todoModule "go-crud/src/todo"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
@@ -21,17 +20,16 @@ func main() {
 	}
 	defer db.Close()
 
-	server := echo.New()
+	todoServer := todoModule.NewTodoServer(db)
 
-	todoRepo := new(repositories.TodoRepo).New(db)
-	todoService := new(services.TodoService).New(todoRepo)
+	e := echo.New()
 
-	router := new(routers.TodoRouter)
-	router.Services.TodoService = todoService
+	API := e.Group("api")
 
-	server = router.New(server)
+	todoGroup := API.Group("/todos")
+	todoServer.Mount(todoGroup)
 
-	server.Start(":9000")
+	e.Start(":9000")
 }
 
 func connect() (*sql.DB, error) {
