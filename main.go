@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 func main() {
@@ -23,6 +24,7 @@ func main() {
 	todoServer := todoModule.NewTodoServer(db)
 
 	e := echo.New()
+	e.Pre(middleware.RemoveTrailingSlash())
 
 	API := e.Group("api")
 
