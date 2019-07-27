@@ -163,3 +163,71 @@ func Test_SaveTodo_ContextBind_Error(t *testing.T) {
 	// Assertions
 	assert.Error(t, h.SaveTodo(c))
 }
+
+func Test_UpdateTodo_ContextBind_Error(t *testing.T) {
+	todoJSON := `{"title":"Sleep","detail":"Tidur Malam","is_done":true`
+	// Setup
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(todoJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	c := e.NewContext(req, rec)
+	c.SetPath("/api/todos/aaa")
+	c.SetParamNames("id")
+	c.SetParamValues("aaa")
+
+	todoService := &TodoServiceMock{}
+	h := NewTodoHandler(todoService)
+
+	// Assertions
+	assert.Error(t, h.UpdateTodo(c))
+}
+
+func Test_UpdateTodo_TodoService_UpdateTodo_Error(t *testing.T) {
+	todoJSON := `{"title":"Sleep","detail":"Tidur Malam","is_done":true}`
+	// Setup
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(todoJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	c := e.NewContext(req, rec)
+	c.SetPath("/api/todos/aaa")
+	c.SetParamNames("id")
+	c.SetParamValues("aaa")
+
+	todoService := &TodoServiceMock{}
+	h := NewTodoHandler(todoService)
+
+	var updateTodoReq UpdateTodoRequest
+	_ = json.Unmarshal([]byte(todoJSON), &updateTodoReq)
+	todoService.On("UpdateTodo", "aaa", &updateTodoReq).Return(errors.New("Return error"))
+
+	// Assertions
+	assert.Error(t, h.UpdateTodo(c))
+}
+
+func Test_UpdateTodo_Success(t *testing.T) {
+	todoJSON := `{"title":"Sleep","detail":"Tidur Malam","is_done":true}`
+	// Setup
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(todoJSON))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	c := e.NewContext(req, rec)
+	c.SetPath("/api/todos/aaa")
+	c.SetParamNames("id")
+	c.SetParamValues("aaa")
+
+	todoService := &TodoServiceMock{}
+	h := NewTodoHandler(todoService)
+
+	var updateTodoReq UpdateTodoRequest
+	_ = json.Unmarshal([]byte(todoJSON), &updateTodoReq)
+	todoService.On("UpdateTodo", "aaa", &updateTodoReq).Return(nil)
+
+	// Assertions
+	assert.NoError(t, h.UpdateTodo(c))
+}
