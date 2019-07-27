@@ -231,3 +231,47 @@ func Test_UpdateTodo_Success(t *testing.T) {
 	// Assertions
 	assert.NoError(t, h.UpdateTodo(c))
 }
+
+func Test_DeleteTodo_Success(t *testing.T) {
+	// Setup
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodDelete, "/", nil)
+	rec := httptest.NewRecorder()
+
+	c := e.NewContext(req, rec)
+	c.SetPath("/api/todos/aaa")
+	c.SetParamNames("id")
+	c.SetParamValues("aaa")
+
+	todoService := &TodoServiceMock{}
+	h := NewTodoHandler(todoService)
+
+	todoService.On("DeleteTodo", "aaa").Return(nil)
+
+	respJSON := `{"message":"Todo deleted successfully"}`
+	expectedJSON := fmt.Sprintf("%s\n", respJSON)
+
+	if assert.NoError(t, h.DeleteTodo(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, expectedJSON, rec.Body.String())
+	}
+}
+
+func Test_DeleteTodo_Error(t *testing.T) {
+	// Setup
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodDelete, "/", nil)
+	rec := httptest.NewRecorder()
+
+	c := e.NewContext(req, rec)
+	c.SetPath("/api/todos/aaa")
+	c.SetParamNames("id")
+	c.SetParamValues("aaa")
+
+	todoService := &TodoServiceMock{}
+	h := NewTodoHandler(todoService)
+
+	todoService.On("DeleteTodo", "aaa").Return(errors.New("Return error"))
+
+	assert.Error(t, h.DeleteTodo(c))
+}
